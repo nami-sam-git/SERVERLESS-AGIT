@@ -2,9 +2,11 @@ import json
 import boto3
 from botocore.exceptions import ClientError
 
-# Inisialisasi klien DynamoDB
+# Inisialisasi klien DynamoDB dan SQS
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('BukuTamuTable')
+sqs = boto3.client('sqs')
+queue_url = 'https://sqs.<region>.amazonaws.com/<account-id>/BukuTamuQueue'  # Ganti dengan URL SQS Anda
 
 def lambda_handler(event, context):
     try:
@@ -103,12 +105,18 @@ def handle_post(event):
         import time
         id = str(int(time.time()))
         
-        # Masukkan data ke tabel
-        table.put_item(Item={
+        # Buat pesan untuk dikirim ke SQS
+        message = {
             'id': id,
             'nama': nama,
             'pesan': pesan
-        })
+        }
+        
+        # Kirim pesan ke SQS
+        sqs.send_message(
+            QueueUrl=queue_url,
+            MessageBody=json.dumps(message)
+        )
         
         # Kembalikan respons sukses
         return {
@@ -117,7 +125,7 @@ def handle_post(event):
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'message': 'Tamu berhasil ditambahkan!', 'id': id})
+            'body': json.dumps({'message': 'Data tamu berhasil dikirim ke antrian!', 'id': id})
         }
     
     except ClientError as e:
