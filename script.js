@@ -24,8 +24,8 @@ $(document).ready(function() {
             success: function(response) {
                 console.log('Respons API:', response); // Debug: Lihat respons API di konsol
 
-                // Parse `body` dari string JSON ke array objek
-                const data = JSON.parse(response.body);
+                const data = response.body ? JSON.parse(response.body) : response;
+                // API langsung return array/object
 
                 // Urutkan data dari yang terbaru (berdasarkan ID atau timestamp)
                 const sortedData = data.sort((a, b) => b.id - a.id);
