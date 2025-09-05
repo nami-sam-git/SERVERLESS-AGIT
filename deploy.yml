@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main  # Trigger workflow saat ada push ke branch main
-
+# run
 jobs:
   deploy:
     runs-on: ubuntu-latest
